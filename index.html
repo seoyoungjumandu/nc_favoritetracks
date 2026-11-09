@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>너드커넥션 취향표</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background: #ffffff;
+      color: #222;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 30px;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #999;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    .chart {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 35px 25px;
+    }
+
+    .album-card {
+      min-width: 0;
+      text-align: center;
+    }
+
+    .album-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 13px;
+    }
+
+    .album-image {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+      background: #f2f2f2;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f3f3f3;
+      color: #aaa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    select {
+      width: 100%;
+      margin-top: 12px;
+      padding: 11px 10px;
+      border: 1px solid #ddd;
+      border-radius: 0;
+      background: white;
+      color: #444;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .selected-track {
+      min-height: 20px;
+      margin-top: 10px;
+      font-size: 25px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .download-area {
+      text-align: center;
+      margin-top: 45px;
+    }
+
+    button {
+      padding: 13px 28px;
+      border: none;
+      background: #222;
+      color: white;
+      font-size: 13px;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #555;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 30px 15px;
+      }
+
+      header h1 {
+        font-size: 24px;
+      }
+
+      .chart {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px 14px;
+      }
+
+      .album-title {
+        font-size: 14px;
+      }
+
+      select {
+        font-size: 12px;
+        padding: 10px 5px;
+      }
+
+      .selected-track {
+        font-size: 12px;
+      }
+    }
+    .hide-on-export {
+  display: none !important;
+}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header>
+      <h1>너드커넥션 취향표</h1>
+      <p>CHOOSE YOUR FAVORITE TRACKS</p>
+    </header>
+
+    <main class="chart" id="musicChart"></main>
+
+    <div class="download-area">
+      <button onclick="downloadChart()">DOWNLOAD PNG</button>
+    </div>
+
+  </div>
+
+  <script>
+    /*
+      이미지 파일은 index.html과 같은 위치에
+      images 폴더를 만들고 그 안에 넣어주세요.
+
+      예시:
+      images/Single.jpg
+      images/Hymn of the Birds.WEBP
+    */
+
+    const albums = [
+      {
+        title: "Single",
+        defaultImage: "images/Single.WEBP",
+        tracks: [
+          "Hymn of the Birds",
+          "대나무숲",
+          "좋은 밤 좋은 꿈",
+          "Back in Time",
+          "진눈깨비",
+          "걸어갈래요",
+          "두려울뿐야",
+          "버들길",
+          "파블로",
+          "그 또한 우리 사랑",
+          "그대만 있다면",
+          "Cliché"
+        ],
+        trackImages: {
+          "Hymn of the Birds": "images/Hymn of the Birds.WEBP",
+          "대나무숲": "images/bambooforest.WEBP",
+          "좋은 밤 좋은 꿈": "images/gngd.WEBP",
+          "Back in Time": "images/Back in Time.WEBP",
+          "진눈깨비": "images/timefalling.WEBP",
+          "걸어갈래요": "images/iwillwalk.WEBP",
+          "두려울뿐야": "images/nan.WEBP",
+          "버들길": "images/beodeulgil.WEBP",
+          "파블로": "images/pablo.WEBP",
+          "그 또한 우리 사랑": "images/thatsalsoourlove.WEBP",
+          "그대만 있다면": "images/ifihaveyouonly.WEBP",
+          "Cliché": "images/Cliche.WEBP"
+        }
+      },
+
+      {
+        title: "TOO FAST",
+        image: "images/TOO FAST.WEBP",
+        tracks: [
+          "Waterfall",
+          "Marion",
+          "V",
+          "Interlude",
+          "Castel",
+          "Where are we"
+        ]
+      },
+
+      {
+        title: "New Century Masterpiece Cinema",
+        image: "images/New Century Masterpiece Cinema.WEBP",
+        tracks: [
+          "21st Century Kingdom",
+          "Hollywood Movie Star",
+          "29",
+          "Behind the Trees",
+          "SUPERNOVA!",
+          "항성통신",
+          "우린 노래가 될까",
+          "Snowman in a Bathtub",
+          "Green Fields",
+          "Odds",
+          "Life Dancing",
+          "조용히 완전히 영원히"
+        ]
+      },
+
+      {
+        title: "설명하기 어려운 것들",
+        image: "images/hardtoexplain.WEBP",
+        tracks: [
+          "Planet Earth",
+          "Stand Up",
+          "Hi, Drunk",
+          "I Robbed a Bank",
+          "여전히 이곳에"
+        ]
+      },
+
+      {
+        title: "그래도 우리는",
+        image: "images/andyetwestill.WEBP",
+        tracks: [
+          "그림자 놀이",
+          "Psychiatric Hospital",
+          "headshrinker",
+          "CASH",
+          "Losing Myself",
+          "무너진 땅 위에서",
+          "사랑을 닮은 이유로",
+          "꽉 잡아",
+          "She",
+          "Freddy",
+          "Clown",
+          "가장 높은 인연",
+          "행운을 빌어",
+          "딱 네 잔"
+        ]
+      },
+
+      {
+        title: "파도의 고점",
+        image: "images/onthecrestofawave.WEBP",
+        tracks: [
+          "Sunset",
+          "타다 남은 별",
+          "오래된 마음",
+          "Part of Time",
+          "커튼콜",
+          "달에게 물어봐"
+        ]
+      }
+    ];
+
+
+    const chart = document.getElementById("musicChart");
+
+
+    function createAlbumCard(album, index) {
+      const card = document.createElement("section");
+      card.className = "album-card";
+
+      const title = document.createElement("div");
+      title.className = "album-title";
+      title.textContent = album.title;
+
+      const imageArea = document.createElement("div");
+
+      const image = document.createElement("img");
+      image.className = "album-image";
+      image.alt = album.title;
+
+      const placeholder = document.createElement("div");
+      placeholder.className = "image-placeholder";
+      placeholder.textContent = "IMAGE";
+
+      function setImage(src) {
+        imageArea.innerHTML = "";
+
+        if (!src) {
+          imageArea.appendChild(placeholder.cloneNode(true));
+          return;
+        }
+
+        const newImage = document.createElement("img");
+        newImage.className = "album-image";
+        newImage.alt = album.title;
+        newImage.src = src;
+
+        newImage.onerror = function () {
+          imageArea.innerHTML = "";
+          imageArea.appendChild(placeholder.cloneNode(true));
+        };
+
+        imageArea.appendChild(newImage);
+      }
+
+      // 처음 표시할 이미지
+      setImage(album.defaultImage || album.image);
+
+      const select = document.createElement("select");
+      select.innerHTML = '<option value="">곡을 선택하세요</option>';
+
+      album.tracks.forEach(track => {
+        const option = document.createElement("option");
+        option.value = track;
+        option.textContent = track;
+        select.appendChild(option);
+      });
+
+      const selectedTrack = document.createElement("div");
+      selectedTrack.className = "selected-track";
+
+      select.addEventListener("change", function () {
+        const track = this.value;
+
+        selectedTrack.textContent = track;
+
+        // Single 앨범은 곡별 이미지로 변경
+        if (album.trackImages) {
+          const trackImage = album.trackImages[track];
+
+          if (trackImage) {
+            setImage(trackImage);
+          } else {
+            setImage(album.defaultImage);
+          }
+        }
+      });
+
+      card.appendChild(title);
+      card.appendChild(imageArea);
+      card.appendChild(select);
+      card.appendChild(selectedTrack);
+
+      return card;
+    }
+
+
+    albums.forEach((album, index) => {
+      chart.appendChild(createAlbumCard(album, index));
+    });
+
+
+    // PNG 다운로드
+    async function downloadChart() {
+  const button = document.querySelector("button");
+  const selects = document.querySelectorAll("select");
+
+  button.style.display = "none";
+
+  // 트랙 선택창 숨기기
+  selects.forEach(select => {
+    select.classList.add("hide-on-export");
+  });
+
+  try {
+    const canvas = await html2canvas(
+      document.querySelector(".container"),
+      {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true
+      }
+    );
+
+    const link = document.createElement("a");
+    link.download = "my-music-chart.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+  } catch (error) {
+    alert("이미지를 저장하지 못했습니다. 다시 시도해주세요.");
+    console.error(error);
+
+  } finally {
+    // 저장 후 원래 화면으로 복구
+    selects.forEach(select => {
+      select.classList.remove("hide-on-export");
+    });
+
+    button.style.display = "inline-block";
+  }
+}
+  </script>
+
+</body>
+</html>
